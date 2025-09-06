@@ -6,25 +6,50 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const uri = "mongodb+srv://22pa1a1275:Thor2330111@cluster.tjefsrm.mongodb.net/task_management_db?retryWrites=true&w=majority";
+const uri = process.env.MONGODB_URI || "mongodb+srv://22pa1a1275:Thor2330111@cluster.tjefsrm.mongodb.net/task_management_db?retryWrites=true&w=majority";
 const client = new MongoClient(uri);
 let db;
 
 async function connect() {
   if (!db) {
-    await client.connect();
-    // Don't specify database name here since it's already in the URI
-    db = client.db();
-    console.log('API connected to MongoDB Atlas');
+    try {
+      await client.connect();
+      // Don't specify database name here since it's already in the URI
+      db = client.db();
+      console.log('API connected to MongoDB Atlas');
+    } catch (error) {
+      console.error('Failed to connect to MongoDB:', error);
+      throw error;
+    }
   }
 }
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: "Argonz Backend API", 
+    version: "1.0.0",
+    endpoints: [
+      "GET /api/health",
+      "GET /api/categories", 
+      "GET /api/mentors",
+      "GET /api/tasks"
+    ]
+  });
+});
 
 // Health
 app.get('/api/health', async (req, res) => {
   try {
     await connect();
-    res.json({ ok: true });
+    res.json({ 
+      ok: true, 
+      message: "Server is running",
+      timestamp: new Date().toISOString(),
+      database: "connected"
+    });
   } catch (e) {
+    console.error('Health check failed:', e);
     res.status(500).json({ ok: false, error: e.message });
   }
 });
