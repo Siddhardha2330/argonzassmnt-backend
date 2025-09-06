@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ObjectId } = require('mongodb');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -229,6 +230,21 @@ app.post('/api/mentors', async (req, res) => {
   }
 });
 
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  process.exit(1);
+});
+
 const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`API server running on http://localhost:${port}`));
+app.listen(port, '0.0.0.0', () => {
+  console.log(`API server running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`MongoDB URI configured: ${uri ? 'Yes' : 'No'}`);
+});
 
