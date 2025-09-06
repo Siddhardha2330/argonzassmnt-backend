@@ -9,6 +9,7 @@ app.use(express.json());
 
 // Multiple MongoDB connection strategies for Render compatibility
 const baseUri = "mongodb+srv://22pa1a1275:Thor2330111@cluster.tjefsrm.mongodb.net";
+const uri = process.env.MONGODB_URI || `${baseUri}/task_management_db?retryWrites=true&w=majority&ssl=true&authSource=admin`;
 const connectionStrings = [
   `${baseUri}/task_management_db?retryWrites=true&w=majority&ssl=true&authSource=admin`,
   `${baseUri}/task_management_db?retryWrites=true&w=majority&ssl=true`,
