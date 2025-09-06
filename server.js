@@ -465,7 +465,12 @@ app.delete('/api/tasks/:id', async (req, res) => {
 // Create mentor (public)
 app.post('/api/mentors', async (req, res) => {
   try {
+    console.log('👥 Mentors POST request received');
+    console.log('👥 Request body:', req.body);
+    
     await connect();
+    console.log('👥 Database connected successfully');
+    
     const {
       profession,
       specialization,
@@ -477,7 +482,11 @@ app.post('/api/mentors', async (req, res) => {
       currency,
       availability_status
     } = req.body || {};
+    
+    console.log('👥 Extracted data:', { profession, specialization, bio });
+    
     if (!profession) return res.status(400).json({ error: 'Missing profession' });
+    
     const now = new Date();
     const doc = {
       user_id: null,
@@ -499,9 +508,16 @@ app.post('/api/mentors', async (req, res) => {
       created_at: now,
       updated_at: now
     };
+    
+    console.log('👥 Document to insert:', doc);
+    
     const result = await db.collection('mentorProfiles').insertOne(doc);
+    console.log('👥 Insert result:', result);
+    
     res.json({ ok: true, _id: String(result.insertedId) });
   } catch (e) {
+    console.error('❌ Mentors POST failed:', e.message);
+    console.error('❌ Full error:', e);
     res.status(500).json({ error: e.message });
   }
 });
