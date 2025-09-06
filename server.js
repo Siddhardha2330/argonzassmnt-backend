@@ -227,14 +227,14 @@ app.get('/api/mentors', async (req, res) => {
     
     // Ensure the collection exists
     try {
-      await db.createCollection('mentorProfiles');
-      console.log('📋 Created mentorProfiles collection');
+      await db.createCollection('mentors');
+      console.log('📋 Created mentors collection');
     } catch (e) {
       // Collection might already exist, that's fine
-      console.log('📋 Collection mentorProfiles already exists or creation failed:', e.message);
+      console.log('📋 Collection mentors already exists or creation failed:', e.message);
     }
     
-    const mentors = await db.collection('mentorProfiles')
+    const mentors = await db.collection('mentors')
       .find(filter)
       .sort({ average_rating: -1, total_followers: -1 })
       .toArray();
@@ -523,14 +523,14 @@ app.post('/api/mentors', async (req, res) => {
     
     // Ensure the collection exists
     try {
-      await db.createCollection('mentorProfiles');
-      console.log('👥 Created mentorProfiles collection');
+      await db.createCollection('mentors');
+      console.log('👥 Created mentors collection');
     } catch (e) {
       // Collection might already exist, that's fine
-      console.log('👥 Collection mentorProfiles already exists or creation failed:', e.message);
+      console.log('👥 Collection mentors already exists or creation failed:', e.message);
     }
     
-    const result = await db.collection('mentorProfiles').insertOne(doc);
+    const result = await db.collection('mentors').insertOne(doc);
     console.log('👥 Insert result:', result);
     
     res.json({ ok: true, _id: String(result.insertedId) });
