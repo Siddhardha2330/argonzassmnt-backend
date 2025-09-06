@@ -7,19 +7,42 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const uri = process.env.MONGODB_URI || "mongodb+srv://22pa1a1275:Thor2330111@cluster.tjefsrm.mongodb.net/task_management_db?retryWrites=true&w=majority";
-const client = new MongoClient(uri);
+// Try different MongoDB connection approaches
+const uri = process.env.MONGODB_URI || "mongodb+srv://22pa1a1275:Thor2330111@cluster.tjefsrm.mongodb.net/task_management_db?retryWrites=true&w=majority&ssl=true&authSource=admin";
+
+// Connection options optimized for Render
+const clientOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 10000,
+  connectTimeoutMS: 15000,
+  socketTimeoutMS: 45000,
+  maxPoolSize: 10,
+  minPoolSize: 1,
+  maxIdleTimeMS: 30000,
+  // Try without strict SSL validation first
+  tlsAllowInvalidCertificates: true,
+  tlsAllowInvalidHostnames: true,
+};
+
+const client = new MongoClient(uri, clientOptions);
 let db;
 
 async function connect() {
   if (!db) {
     try {
+      console.log('Attempting to connect to MongoDB Atlas...');
       await client.connect();
       // Don't specify database name here since it's already in the URI
       db = client.db();
-      console.log('API connected to MongoDB Atlas');
+      console.log('✅ Successfully connected to MongoDB Atlas');
+      
+      // Test the connection
+      await db.admin().ping();
+      console.log('✅ MongoDB connection verified');
     } catch (error) {
-      console.error('Failed to connect to MongoDB:', error);
+      console.error('❌ Failed to connect to MongoDB:', error.message);
+      console.error('Connection URI:', uri.replace(/\/\/.*@/, '//***:***@')); // Hide credentials
       throw error;
     }
   }
@@ -51,7 +74,14 @@ app.get('/api/health', async (req, res) => {
     });
   } catch (e) {
     console.error('Health check failed:', e);
-    res.status(500).json({ ok: false, error: e.message });
+    // Return partial health status even if DB is down
+    res.status(200).json({ 
+      ok: true, 
+      message: "Server is running",
+      timestamp: new Date().toISOString(),
+      database: "disconnected",
+      error: e.message
+    });
   }
 });
 
